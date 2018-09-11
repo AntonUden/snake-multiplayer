@@ -19,6 +19,8 @@ var fps = 4;
 
 var MAP_WIDTH = 500;
 var MAP_HEIGHT = 500;
+
+var MAX_FOOD = 1000;
 //-------------------------------------
 
 var port = process.env.PORT || 80;
@@ -37,32 +39,32 @@ var SOCKET_ACTIVITY = {};
 var PLAYER_LIST = {};
 var FOOD_LIST = {};
 
-var Food = function(x, y) {
+var Food = function(id, x, y) {
 	var self = {
+		id:id,
 		x:x,
 		y:y
 	}
 	return self;
 }
 
-
 // Directions: 0 = up (-y), 1 = right (+x), 2 = down = (+y), 3 = left (-x)
 var Player = function(id) {
 	var self = {
 		id:id,
 		direction:0,
+		lastDirection:0,
 		x:MAP_WIDTH / 2,
 		y:MAP_HEIGHT / 2,
 		score:0,
-		trail:[],
+		tailBlocks:[],
 		inGame:false
 	}
 
 	self.update = function() {
-		self.trail.push(new Trail(self.x, self.y));
-		while(self.score < self.trail.length) {
-			console.log("self.trail.pop();");
-			delete self.trail.pop();
+		self.tailBlocks.unshift(new Tail(self.x, self.y));
+		while(self.score + 2 < self.tailBlocks.length) {
+			delete self.tailBlocks.pop();
 		}
 		switch(self.direction) {
 			case 0:
@@ -78,29 +80,47 @@ var Player = function(id) {
 				self.x--;
 				break;
 			default:
+			// Invalid direction
+				console.log("Invalid direction for player " + self.id + ". Direction reset to 0");
+				self.direction = 0;
 				break;
+		}
+		self.lastDirection = self.direction;
+
+		if(self.x <= 0 || self.x >= MAP_WIDTH || self.y <= 0 || self.y >= MAP_WIDTH) {
+			self.die();
+			return;
 		}
 
 		for(let p in PLAYER_LIST) {
 			let player = PLAYER_LIST[p];
-			for(let t in player.trail) {
-				let ptrail = player.trail[t];
-				if(self.x == ptrail.x && self.y == ptrail.y) {
+			for(let t in player.tailBlocks) {
+				let pTail = player.tailBlocks[t];
+				if(self.x == pTail.x && self.y == pTail.y) {
 					self.die();
 					player.score+=(self.score / 2);
+					return;
 				}
+			}
+		}
+
+		for(let f in FOOD_LIST) {
+			let food = FOOD_LIST[f];
+			if(self.x == food.x && self.y == food.y) {
+				self.score++;
+				delete FOOD_LIST[food.id];
 			}
 		}
 	}
 
 	self.die = function() {
 		self.inGame = false;
-		self.deleteTrail;
+		self.deleteTail();
 	}
 
-	self.deleteTrail = function() {
-		for (let i = self.trail.length; i > 0; i--) {
-			self.trail.pop();
+	self.deleteTail = function() {
+		for (let i = self.tailBlocks.length; i > 0; i--) {
+			self.tailBlocks.pop();
 		}
 	}
 
@@ -113,7 +133,7 @@ var Player = function(id) {
 	return self;
 }
 
-var Trail = function(x, y, playerId) {
+var Tail = function(x, y, playerId) {
 	var self = {
 		x:x,
 		y:y,
@@ -124,7 +144,8 @@ var Trail = function(x, y, playerId) {
 
 function update() {
 	let playerPack = [];
-	let trailPack = [];
+	let tailPack = [];
+	let foodPack = [];
 
 	for (let p in PLAYER_LIST) {
 		let player = PLAYER_LIST[p];
@@ -137,14 +158,31 @@ function update() {
 				x:player.x,
 				y:player.y
 			});
-			for(let t in player.trail) {
-				let trail = player.trail[t];
-				trailPack.push({
-					x:trail.x,
-					y:trail.y
+			for(let t in player.tailBlocks) {
+				let tail = player.tailBlocks[t];
+				tailPack.push({
+					x:tail.x,
+					y:tail.y,
+					player:player.id
 				});
 			}
 		}
+	}
+
+	for(let f in FOOD_LIST) {
+		let food = FOOD_LIST[f];
+		foodPack.push({
+			x:food.x,
+			y:food.y
+		});
+	}
+
+	for(let s in SOCKET_LIST) {
+		SOCKET_LIST[s].emit("gamestate" ,{
+			players:playerPack,
+			playerTails:tailPack,
+			food:foodPack
+		});
 	}
 }
 
@@ -152,9 +190,24 @@ setInterval(function() {
 	update();
 }, 1000 / fps);
 
-PLAYER_LIST[1337] = new Player(1337);
-PLAYER_LIST[1337].spawn();
-PLAYER_LIST[1337].score = 4;
+setInterval(function() {
+	if(FOOD_LIST.length < MAX_FOOD) {
+		spawnFood();
+	}
+}, 500);
+
+for (let i = 0; i < MAX_FOOD / 2; i++) {
+	spawnFood();
+}
+
+function spawnFood() {
+	let id = Math.random();
+	FOOD_LIST[id] = new Food(id, Math.floor(Math.random() * (MAP_WIDTH - 4)) + 2, Math.floor(Math.random() * (MAP_WIDTH - 4)) + 2);
+}
+
+//PLAYER_LIST[1337] = new Player(1337);
+//PLAYER_LIST[1337].spawn();
+//PLAYER_LIST[1337].score = 4;
 
 function disconnectSocket(id) {
 	SOCKET_LIST[id].disconnect();
@@ -169,12 +222,20 @@ io.sockets.on("connection", function(socket) {
 	}
 	SOCKET_LIST[socket.id] = socket;
 	let player = Player(socket.id);
+
+	// TEST CODE
+	player.spawn();
+	player.score = 10;
+	// END TEST CODE
+
 	PLAYER_LIST[socket.id] = player;
 	console.log(colors.cyan("[Snake] Socket connection with id " + socket.id));
 	socket.emit("id", {
 		id:socket.id
 	});
 	
+
+
 	socket.on("disconnect", function() {
 		try {
 			delete PLAYER_LIST[socket.id];
@@ -189,13 +250,13 @@ io.sockets.on("connection", function(socket) {
 
 	socket.on('keyPress',function(data){
 		try {
-			if(data.inputId === 'up')
+			if(data.inputId === 'up' && player.lastDirection != 2)
 				player.direction = 0;
-			else if(data.inputId === 'right')
+			else if(data.inputId === 'right' && player.lastDirection != 3)
 				player.direction = 1;
-			else if(data.inputId === 'down')
+			else if(data.inputId === 'down' && player.lastDirection != 0)
 				player.direction = 2;
-			else if(data.inputId === 'left')
+			else if(data.inputId === 'left' && player.lastDirection != 1)
 				player.direction = 3;
 		} catch(err) {
 			if(debug) {
