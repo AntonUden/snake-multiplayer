@@ -20,7 +20,7 @@ var fps = 5;
 var MAP_WIDTH = 500;
 var MAP_HEIGHT = 500;
 
-var MAX_FOOD = 1000;
+var MAX_FOOD = 1500;
 //-------------------------------------
 
 var port = process.env.PORT || 80;
@@ -196,7 +196,7 @@ setInterval(function() {
 	}
 }, 500);
 
-for (let i = 0; i < MAX_FOOD / 2; i++) {
+for (let i = 0; i < MAX_FOOD; i++) {
 	spawnFood();
 }
 
@@ -204,10 +204,6 @@ function spawnFood() {
 	let id = Math.random();
 	FOOD_LIST[id] = new Food(id, Math.floor(Math.random() * (MAP_WIDTH - 4)) + 2, Math.floor(Math.random() * (MAP_WIDTH - 4)) + 2);
 }
-
-//PLAYER_LIST[1337] = new Player(1337);
-//PLAYER_LIST[1337].spawn();
-//PLAYER_LIST[1337].score = 4;
 
 function disconnectSocket(id) {
 	SOCKET_LIST[id].disconnect();
@@ -223,10 +219,8 @@ io.sockets.on("connection", function(socket) {
 	SOCKET_LIST[socket.id] = socket;
 	let player = Player(socket.id);
 
-	// TEST CODE
+	// TODO: Add menu
 	player.spawn();
-	player.score = 10;
-	// END TEST CODE
 
 	PLAYER_LIST[socket.id] = player;
 	console.log(colors.cyan("[Snake] Socket connection with id " + socket.id));

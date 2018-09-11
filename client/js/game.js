@@ -6,7 +6,7 @@ const PIXEL_SIZE = 10;
 var PLAYER_ID = -1;
 
 
-var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'snake', {preload: preload, create:create});
+var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'snake-game', {preload: preload, create:create});
 var socket = io();
 
 var cameraFollow;
@@ -25,6 +25,10 @@ function create() {
 	game.world.setBounds(0, 0, MAP_WIDTH * PIXEL_SIZE, MAP_HEIGHT * PIXEL_SIZE);
 	game.add.tileSprite(0, 0, game.width * PIXEL_SIZE, game.height * PIXEL_SIZE, "background");
 	//game.stage.backgroundColor = "#FFFFFF";
+
+	game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+	game.scale.fullScreenScaleMode = Phaser.ScaleManager.RESIZE;
+	game.scale.parentIsWindow = true;
 
 	cameraFollow = game.add.sprite(game.world.centerX, game.world.centerY);
 
@@ -66,19 +70,19 @@ socket.on("gamestate", function(data) {
 	for(let i = 0; i < data.food.length; i++) {
 		let foodObj = data.food[i];
 		let g = game.add.graphics(foodObj.x * PIXEL_SIZE, foodObj.y * PIXEL_SIZE); 
-    	g.beginFill(0x000077, 1);
-    	g.drawRect(0, 0, PIXEL_SIZE, PIXEL_SIZE);
-    	g.endFill();
-    	food.add(g);
+		g.beginFill(0x000077, 1);
+		g.drawRect(0, 0, PIXEL_SIZE, PIXEL_SIZE);
+		g.endFill();
+		food.add(g);
 	}
 
 	for(let i = 0; i < data.playerTails.length; i++) {
 		let tail = data.playerTails[i];
 		let g = game.add.graphics(tail.x * PIXEL_SIZE, tail.y * PIXEL_SIZE); 
-    	g.beginFill(0x000000, 1);
-    	g.drawRect(0, 0, PIXEL_SIZE, PIXEL_SIZE);
-    	g.endFill();
-    	tails.add(g);
+		g.beginFill(0x000000, 1);
+		g.drawRect(0, 0, PIXEL_SIZE, PIXEL_SIZE);
+		g.endFill();
+		tails.add(g);
 	}
 
 	for(let i = 0; i < data.players.length; i++) {
@@ -95,21 +99,21 @@ socket.on("gamestate", function(data) {
 			//game.camera.y = (player.y * PIXEL_SIZE) - (game.height / 2);
 		}
 
-    	g.beginFill(color, 1);
-    	g.drawRect(0, 0, PIXEL_SIZE, PIXEL_SIZE);
-    	g.endFill();
-    	players.add(g);
+		g.beginFill(color, 1);
+		g.drawRect(0, 0, PIXEL_SIZE, PIXEL_SIZE);
+		g.endFill();
+		players.add(g);
 		//players.add(new Phaser.Rectangle((data.playerTails[i].x - (PIXEL_SIZE / 2)) * PIXEL_SIZE, (data.playerTails[i].y - (PIXEL_SIZE / 2)) * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE));
 	}
 });
 
 $(document).keydown(function(e) { 
-    var key = 0;
-    if (e == null) {
-    	key = event.keyCode;
-    } else {
-    	key = e.which;
-    } 
+	var key = 0;
+	if (e == null) {
+		key = event.keyCode;
+	} else {
+		key = e.which;
+	} 
 	
 	if ((key === 68 || key === 39)) { //d
 		socket.emit('keyPress', {
