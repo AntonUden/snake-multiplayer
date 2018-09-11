@@ -1,12 +1,12 @@
-var MAP_WIDTH = 500;
-var MAP_HEIGHT = 500;
+const MAP_WIDTH = 500;
+const MAP_HEIGHT = 500;
 
-var PIXEL_SIZE = 10;
+const PIXEL_SIZE = 10;
 
 var PLAYER_ID = -1;
 
 
-var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'snake', {create:create});
+var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'snake', {preload: preload, create:create});
 var socket = io();
 
 var cameraFollow;
@@ -17,12 +17,14 @@ var food;
 var map;
 
 
-function preUpdate() {
+function preload() {
+	game.load.image('background', '/client/img/game/background.png');
 }
 
 function create() {
 	game.world.setBounds(0, 0, MAP_WIDTH * PIXEL_SIZE, MAP_HEIGHT * PIXEL_SIZE);
-	game.stage.backgroundColor = "#FFFFFF";
+	game.add.tileSprite(0, 0, game.width * PIXEL_SIZE, game.height * PIXEL_SIZE, "background");
+	//game.stage.backgroundColor = "#FFFFFF";
 
 	cameraFollow = game.add.sprite(game.world.centerX, game.world.centerY);
 
@@ -31,7 +33,7 @@ function create() {
 	food = game.add.group();
 	map = game.add.group();
 
-	game.camera.follow(cameraFollow, Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
+	game.camera.follow(cameraFollow, Phaser.Camera.FOLLOW_LOCKON, (0.1 / PIXEL_SIZE), (0.1 / PIXEL_SIZE));
 
 	let g = game.add.graphics(0, 0);
 

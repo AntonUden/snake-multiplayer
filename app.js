@@ -15,7 +15,7 @@ app.use('/client',express.static(__dirname + '/client'));
 
 //---------- Server settings ----------
 var MAX_SOCKET_ACTIVITY_PER_SECOND = 1000;
-var fps = 4;
+var fps = 5;
 
 var MAP_WIDTH = 500;
 var MAP_HEIGHT = 500;
