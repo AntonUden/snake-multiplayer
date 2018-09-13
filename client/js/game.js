@@ -2,6 +2,7 @@ const MAP_WIDTH = 500;
 const MAP_HEIGHT = 500;
 
 const PIXEL_SIZE = 10;
+const CAMERA_SPEED = 0.15;
 
 var PLAYER_ID = -1;
 
@@ -15,6 +16,7 @@ var players;
 var tails;
 var food;
 var map;
+var names;
 
 
 function preload() {
@@ -36,8 +38,12 @@ function create() {
 	tails = game.add.group();
 	food = game.add.group();
 	map = game.add.group();
+	names = game.add.group();
 
-	game.camera.follow(cameraFollow, Phaser.Camera.FOLLOW_LOCKON, (0.1 / PIXEL_SIZE), (0.1 / PIXEL_SIZE));
+	game.camera.x = game.world.centerX;
+	game.camera.y = game.world.centerY;
+	game.camera.roundPx = false;
+	game.camera.follow(cameraFollow, Phaser.Camera.FOLLOW_LOCKON, (CAMERA_SPEED / PIXEL_SIZE), (CAMERA_SPEED / PIXEL_SIZE));
 
 	let g = game.add.graphics(0, 0);
 
@@ -57,8 +63,19 @@ socket.on("id", function(data) {
 	console.log("Your id is " + PLAYER_ID);
 });
 
+socket.on("spawn", function(data) {
+	try {
+		game.camera.follow(null, Phaser.Camera.FOLLOW_LOCKON, 1, 1);
+		game.camera.x = data.x * PIXEL_SIZE;
+		game.camera.y = data.y * PIXEL_SIZE;
+		game.camera.follow(cameraFollow, Phaser.Camera.FOLLOW_LOCKON, (CAMERA_SPEED / PIXEL_SIZE), (CAMERA_SPEED / PIXEL_SIZE));
+	} catch(err) {
+		console.log(err);
+	}
+});
+
 socket.on("gamestate", function(data) {
-	if(players == undefined || tails == undefined || food == undefined) {
+	if(players == undefined || tails == undefined || food == undefined || names == undefined) {
 		console.log("Waiting for groups to load");
 		return;
 	}
@@ -66,11 +83,12 @@ socket.on("gamestate", function(data) {
 	players.removeAll();
 	tails.removeAll();
 	food.removeAll();
+	names.removeAll();
 	
 	for(let i = 0; i < data.food.length; i++) {
-		let foodObj = data.food[i];
-		let g = game.add.graphics(foodObj.x * PIXEL_SIZE, foodObj.y * PIXEL_SIZE); 
-		g.beginFill(0x000077, 1);
+		let foodData = data.food[i];
+		let g = game.add.graphics(foodData.x * PIXEL_SIZE, foodData.y * PIXEL_SIZE); 
+		g.beginFill(hslToHex(foodData.color, 100, 35), 1);
 		g.drawRect(0, 0, PIXEL_SIZE, PIXEL_SIZE);
 		g.endFill();
 		food.add(g);
@@ -79,7 +97,7 @@ socket.on("gamestate", function(data) {
 	for(let i = 0; i < data.playerTails.length; i++) {
 		let tail = data.playerTails[i];
 		let g = game.add.graphics(tail.x * PIXEL_SIZE, tail.y * PIXEL_SIZE); 
-		g.beginFill(0x000000, 1);
+		g.beginFill(hslToHex(tail.color, 100, 25), 1);
 		g.drawRect(0, 0, PIXEL_SIZE, PIXEL_SIZE);
 		g.endFill();
 		tails.add(g);
@@ -89,23 +107,38 @@ socket.on("gamestate", function(data) {
 		let player = data.players[i];
 		let g = game.add.graphics(player.x* PIXEL_SIZE, player.y * PIXEL_SIZE); 
 
-		let color = 0x770000;
-
 		if(player.id == PLAYER_ID) {
-			color = 0x007700;
 			cameraFollow.x = (player.x * PIXEL_SIZE);
 			cameraFollow.y = (player.y * PIXEL_SIZE);
 			//game.camera.x = (player.x * PIXEL_SIZE) - (game.width / 2);
 			//game.camera.y = (player.y * PIXEL_SIZE) - (game.height / 2);
 		}
 
-		g.beginFill(color, 1);
+		g.beginFill(hslToHex(player.color, 100, 50), 1);
 		g.drawRect(0, 0, PIXEL_SIZE, PIXEL_SIZE);
 		g.endFill();
 		players.add(g);
+
+		let t = game.add.text(player.x * PIXEL_SIZE, (player.y * PIXEL_SIZE) - 10, player.name, {fill:"#000000", fontSize:"15px"});
+		t.anchor.setTo(0.5);
+		names.add(t);
 		//players.add(new Phaser.Rectangle((data.playerTails[i].x - (PIXEL_SIZE / 2)) * PIXEL_SIZE, (data.playerTails[i].y - (PIXEL_SIZE / 2)) * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE));
 	}
 });
+
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function hslToHex(h,s,l) {
+	let rgb = Phaser.Color.HSLtoRGB(h / 360, s / 100, l / 100);
+	return "0x"+componentToHex(rgb.r) + componentToHex(rgb.g) + componentToHex(rgb.b);
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
 
 $(document).keydown(function(e) { 
 	var key = 0;

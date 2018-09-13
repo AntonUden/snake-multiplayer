@@ -42,6 +42,7 @@ var FOOD_LIST = {};
 var Food = function(id, x, y) {
 	var self = {
 		id:id,
+		color:Math.floor(Math.random() * 360),
 		x:x,
 		y:y
 	}
@@ -58,11 +59,13 @@ var Player = function(id) {
 		y:MAP_HEIGHT / 2,
 		score:0,
 		tailBlocks:[],
-		inGame:false
+		inGame:false,
+		name:"unnamed",
+		color:0
 	}
 
 	self.update = function() {
-		self.tailBlocks.unshift(new Tail(self.x, self.y));
+		self.tailBlocks.unshift(new Tail(self.x, self.y, self.id, self.color));
 		while(self.score + 2 < self.tailBlocks.length) {
 			delete self.tailBlocks.pop();
 		}
@@ -127,17 +130,19 @@ var Player = function(id) {
 	self.spawn = function() {
 		self.x = Math.floor(Math.random() * (MAP_WIDTH - 20)) + 10;
 		self.y = Math.floor(Math.random() * (MAP_WIDTH - 20)) + 10;
+		self.color = self.y = Math.floor(Math.random() * 360);
 		self.score = 0;
 		self.inGame = true;
 	}
 	return self;
 }
 
-var Tail = function(x, y, playerId) {
+var Tail = function(x, y, playerId, color) {
 	var self = {
 		x:x,
 		y:y,
-		playerId:playerId
+		playerId:playerId,
+		color:color
 	}
 	return self;
 }
@@ -156,14 +161,17 @@ function update() {
 			playerPack.push({
 				id:player.id,
 				x:player.x,
-				y:player.y
+				y:player.y,
+				name:player.name,
+				color:player.color
 			});
 			for(let t in player.tailBlocks) {
 				let tail = player.tailBlocks[t];
 				tailPack.push({
 					x:tail.x,
 					y:tail.y,
-					player:player.id
+					color:tail.color
+					//player:player.id
 				});
 			}
 		}
@@ -173,7 +181,8 @@ function update() {
 		let food = FOOD_LIST[f];
 		foodPack.push({
 			x:food.x,
-			y:food.y
+			y:food.y,
+			color:food.color
 		});
 	}
 
@@ -205,6 +214,17 @@ function spawnFood() {
 	FOOD_LIST[id] = new Food(id, Math.floor(Math.random() * (MAP_WIDTH - 4)) + 2, Math.floor(Math.random() * (MAP_WIDTH - 4)) + 2);
 }
 
+function spawnPlayer(id) {
+	try {
+		PLAYER_LIST[id].spawn();
+		SOCKET_LIST[id].emit("spawn", {x:PLAYER_LIST[id].x, y:PLAYER_LIST[id].y})
+	} catch(err) {
+		if(debug) {
+			throw err;
+		}
+	}
+}
+
 function disconnectSocket(id) {
 	SOCKET_LIST[id].disconnect();
 	delete SOCKET_LIST[id];
@@ -219,16 +239,13 @@ io.sockets.on("connection", function(socket) {
 	SOCKET_LIST[socket.id] = socket;
 	let player = Player(socket.id);
 
-	// TODO: Add menu
-	player.spawn();
-
 	PLAYER_LIST[socket.id] = player;
 	console.log(colors.cyan("[Snake] Socket connection with id " + socket.id));
 	socket.emit("id", {
 		id:socket.id
 	});
 	
-
+	setTimeout(function() {spawnPlayer(socket.id)}, 500);
 
 	socket.on("disconnect", function() {
 		try {
