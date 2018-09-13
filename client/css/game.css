@@ -3,8 +3,16 @@
 	max-height: 100%;
 }
 
-#snake-game {
+#menu {
+	position: fixed;
+	width: 30%;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+    background-color: #FFFFFF;
+}
 
+#snake-game {
 	position: fixed;
 	width: 100%;
 	height: 100%;

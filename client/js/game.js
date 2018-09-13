@@ -63,7 +63,14 @@ socket.on("id", function(data) {
 	console.log("Your id is " + PLAYER_ID);
 });
 
+socket.on("death", function() {
+	setTimeout(function() {
+		$("#menu").show();
+	}, 1000);
+});
+
 socket.on("spawn", function(data) {
+	$("#menu").hide();
 	try {
 		game.camera.follow(null, Phaser.Camera.FOLLOW_LOCKON, 1, 1);
 		game.camera.x = data.x * PIXEL_SIZE;
@@ -139,6 +146,21 @@ function hslToHex(h,s,l) {
 function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
+
+function play() {
+	socket.emit("spawn", {name:$("#name").val()});
+}
+
+$(document).ready(function() {
+	$("#btn_play").click(function() {
+		play();
+	});
+
+	$("form").on('submit',function(e){
+	    e.preventDefault();
+		play();
+	});
+});
 
 $(document).keydown(function(e) { 
 	var key = 0;

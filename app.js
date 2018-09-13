@@ -14,13 +14,14 @@ app.get('/',function(req, res) {
 app.use('/client',express.static(__dirname + '/client'));
 
 //---------- Server settings ----------
-var MAX_SOCKET_ACTIVITY_PER_SECOND = 1000;
-var fps = 5;
+const MAX_SOCKET_ACTIVITY_PER_SECOND = 1000;
+const MAX_NAME_LENGTH = 16;
+const fps = 5;
 
-var MAP_WIDTH = 500;
-var MAP_HEIGHT = 500;
+const MAP_WIDTH = 500;
+const MAP_HEIGHT = 500;
 
-var MAX_FOOD = 1500;
+const MAX_FOOD = 1500;
 //-------------------------------------
 
 var port = process.env.PORT || 80;
@@ -60,7 +61,7 @@ var Player = function(id) {
 		score:0,
 		tailBlocks:[],
 		inGame:false,
-		name:"unnamed",
+		name:"Unnamed player",
 		color:0
 	}
 
@@ -119,6 +120,14 @@ var Player = function(id) {
 	self.die = function() {
 		self.inGame = false;
 		self.deleteTail();
+		
+		try {
+			SOCKET_LIST[self.id].emit("death");
+		} catch(err) {
+			if(debug) {
+				console.log(err);
+			}
+		}
 	}
 
 	self.deleteTail = function() {
@@ -131,6 +140,7 @@ var Player = function(id) {
 		self.x = Math.floor(Math.random() * (MAP_WIDTH - 20)) + 10;
 		self.y = Math.floor(Math.random() * (MAP_WIDTH - 20)) + 10;
 		self.color = self.y = Math.floor(Math.random() * 360);
+		self.direction = Math.floor(Math.random() * 4);
 		self.score = 0;
 		self.inGame = true;
 	}
@@ -157,7 +167,6 @@ function update() {
 
 		if(player.inGame) {
 			player.update();
-			//console.log(player.id + " x: " + player.x + " y: " + player.y);
 			playerPack.push({
 				id:player.id,
 				x:player.x,
@@ -171,7 +180,6 @@ function update() {
 					x:tail.x,
 					y:tail.y,
 					color:tail.color
-					//player:player.id
 				});
 			}
 		}
@@ -188,6 +196,7 @@ function update() {
 
 	for(let s in SOCKET_LIST) {
 		SOCKET_LIST[s].emit("gamestate" ,{
+			score:PLAYER_LIST[s].score,
 			players:playerPack,
 			playerTails:tailPack,
 			food:foodPack
@@ -244,8 +253,6 @@ io.sockets.on("connection", function(socket) {
 	socket.emit("id", {
 		id:socket.id
 	});
-	
-	setTimeout(function() {spawnPlayer(socket.id)}, 500);
 
 	socket.on("disconnect", function() {
 		try {
@@ -259,7 +266,24 @@ io.sockets.on("connection", function(socket) {
 		}
 	});
 
-	socket.on('keyPress',function(data){
+	socket.on("spawn", function(data) {
+		try {
+			if(!PLAYER_LIST[socket.id].inGame) {
+				if(data.name != undefined) {
+					if(!(data.name.length < 1 || data.name.length > MAX_NAME_LENGTH)) {
+						PLAYER_LIST[socket.id].name = data.name;
+					}
+				}
+				spawnPlayer(socket.id);
+			}
+		} catch(err) {
+			if(debug) {
+				throw err;
+			}
+		}
+	});
+
+	socket.on("keyPress",function(data){
 		try {
 			if(data.inputId === 'up' && player.lastDirection != 2)
 				player.direction = 0;
