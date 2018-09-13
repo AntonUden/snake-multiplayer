@@ -152,7 +152,7 @@ function update() {
 
 		if(player.inGame) {
 			player.update();
-			console.log(player.id + " x: " + player.x + " y: " + player.y);
+			//console.log(player.id + " x: " + player.x + " y: " + player.y);
 			playerPack.push({
 				id:player.id,
 				x:player.x,
