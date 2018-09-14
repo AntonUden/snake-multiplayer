@@ -262,22 +262,16 @@ function spawnPlayer(id) {
 	}
 }
 
-function kickPlayer(id) {
-	try {
-		PLAYER_LIST[id].deleteTail();
-		delete PLAYER_LIST[id];
-		disconnectSocket(id);
-	} catch(err) {
-		if(debug) {
-			throw err;
-		}
-	}
-}
-
 function disconnectSocket(id) {
+	try {
+		if(PLAYER_LIST[id] != undefíned) {
+			PLAYER_LIST[id].deleteTail();
+			delete PLAYER_LIST[id];
+		}
+	} catch(err) {
+	}
 	SOCKET_LIST[id].disconnect();
 	delete SOCKET_LIST[id];
-	delete SOCKET_ACTIVITY[id];
 }
 
 io.sockets.on("connection", function(socket) {
