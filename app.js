@@ -14,7 +14,6 @@ app.get('/',function(req, res) {
 app.use('/client',express.static(__dirname + '/client'));
 
 //---------- Server settings ----------
-const MAX_SOCKET_ACTIVITY_PER_SECOND = 1000;
 const MAX_NAME_LENGTH = 16;
 const fps = 5;
 
@@ -36,7 +35,6 @@ io.use(middleware);
 console.log(colors.green("[Snake] Socket started on port " + port));
 
 var SOCKET_LIST = {};
-var SOCKET_ACTIVITY = {};
 var PLAYER_LIST = {};
 var FOOD_LIST = {};
 
@@ -264,6 +262,18 @@ function spawnPlayer(id) {
 	}
 }
 
+function kickPlayer(id) {
+	try {
+		PLAYER_LIST[id].deleteTail();
+		delete PLAYER_LIST[id];
+		disconnectSocket(id);
+	} catch(err) {
+		if(debug) {
+			throw err;
+		}
+	}
+}
+
 function disconnectSocket(id) {
 	SOCKET_LIST[id].disconnect();
 	delete SOCKET_LIST[id];
@@ -272,9 +282,7 @@ function disconnectSocket(id) {
 
 io.sockets.on("connection", function(socket) {
 	socket.id = Math.random();
-	if(SOCKET_ACTIVITY[socket.id] == undefined) {
-		SOCKET_ACTIVITY[socket.id] = 0;
-	}
+
 	SOCKET_LIST[socket.id] = socket;
 	let player = Player(socket.id);
 
@@ -323,17 +331,6 @@ io.sockets.on("connection", function(socket) {
 				player.direction = 2;
 			else if(data.inputId === 'left' && player.lastDirection != 1)
 				player.direction = 3;
-		} catch(err) {
-			if(debug) {
-				throw err;
-			}
-		}
-	});
-
-	socket.on("*", function(data) {
-		try {
-			SOCKET_ACTIVITY[socket.id]++;
-			//console.log(data);
 		} catch(err) {
 			if(debug) {
 				throw err;
