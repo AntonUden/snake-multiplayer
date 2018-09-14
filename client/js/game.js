@@ -6,7 +6,6 @@ const CAMERA_SPEED = 0.15;
 
 var PLAYER_ID = -1;
 
-
 var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'snake-game', {preload: preload, create:create});
 var socket = io();
 
@@ -18,7 +17,6 @@ var food;
 var map;
 var names;
 
-
 function preload() {
 	game.load.image('background', '/client/img/game/background.png');
 }
@@ -26,7 +24,6 @@ function preload() {
 function create() {
 	game.world.setBounds(0, 0, MAP_WIDTH * PIXEL_SIZE, MAP_HEIGHT * PIXEL_SIZE);
 	game.add.tileSprite(0, 0, game.width * PIXEL_SIZE, game.height * PIXEL_SIZE, "background");
-	//game.stage.backgroundColor = "#FFFFFF";
 
 	game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
 	game.scale.fullScreenScaleMode = Phaser.ScaleManager.RESIZE;
@@ -100,6 +97,7 @@ socket.on("gamestate", function(data) {
 		let entry = data.leaderboard.pop();
 		leaderboardcontent += '<div class="lb-entry ' + ((entry.id == PLAYER_ID) ? "lb-entry-self" : "") + '">' + (entry.place + 1) + ': ' + encodeHTML(entry.name) + '</div>';
 	}
+
 	$("#leaderboard-content").html(leaderboardcontent);
 
 	for(let i = 0; i < data.food.length; i++) {
@@ -128,8 +126,6 @@ socket.on("gamestate", function(data) {
 			cameraFollow.x = (player.x * PIXEL_SIZE);
 			cameraFollow.y = (player.y * PIXEL_SIZE);
 			$("#position").html("X: " + player.x + " Y: " + player.y);
-			//game.camera.x = (player.x * PIXEL_SIZE) - (game.width / 2);
-			//game.camera.y = (player.y * PIXEL_SIZE) - (game.height / 2);
 		}
 
 		g.beginFill(hslToHex(player.color, 100, 50), 1);
@@ -140,7 +136,6 @@ socket.on("gamestate", function(data) {
 		let t = game.add.text(player.x * PIXEL_SIZE, (player.y * PIXEL_SIZE) - 10, player.name, {fill:"#000000", fontSize:"15px"});
 		t.anchor.setTo(0.5);
 		names.add(t);
-		//players.add(new Phaser.Rectangle((data.playerTails[i].x - (PIXEL_SIZE / 2)) * PIXEL_SIZE, (data.playerTails[i].y - (PIXEL_SIZE / 2)) * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE));
 	}
 });
 
@@ -149,8 +144,8 @@ function encodeHTML(s) {
 }
 
 function componentToHex(c) {
-    var hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
+	var hex = c.toString(16);
+	return hex.length == 1 ? "0" + hex : hex;
 }
 
 function hslToHex(h,s,l) {
@@ -159,7 +154,7 @@ function hslToHex(h,s,l) {
 }
 
 function rgbToHex(r, g, b) {
-    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+	return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
 function play() {
@@ -172,7 +167,7 @@ $(document).ready(function() {
 	});
 
 	$("form").on('submit',function(e){
-	    e.preventDefault();
+		e.preventDefault();
 		play();
 	});
 

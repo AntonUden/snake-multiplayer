@@ -12,7 +12,7 @@
 	min-width: 200px;
 	z-index: 4;
 	transform: translate(-50%, -50%);
-    background-color: #FFFFFF;
+	background-color: #FFFFFF;
 }
 
 #snake-game {
