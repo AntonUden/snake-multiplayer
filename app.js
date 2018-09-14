@@ -147,6 +147,18 @@ var Player = function(id) {
 	return self;
 }
 
+function dynamicSort(property) {
+    var sortOrder = 1;
+    if(property[0] === "-") {
+        sortOrder = -1;
+        property = property.substr(1);
+    }
+    return function (a,b) {
+        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+        return result * sortOrder;
+    }
+}
+
 var Tail = function(x, y, playerId, color) {
 	var self = {
 		x:x,
@@ -162,11 +174,16 @@ function update() {
 	let tailPack = [];
 	let foodPack = [];
 
+	let leaderboardPlayers = [];
+
 	for (let p in PLAYER_LIST) {
 		let player = PLAYER_LIST[p];
 
 		if(player.inGame) {
 			player.update();
+			if(!player.inGame) { // Player died
+				continue;
+			}
 			playerPack.push({
 				id:player.id,
 				x:player.x,
@@ -174,6 +191,7 @@ function update() {
 				name:player.name,
 				color:player.color
 			});
+			leaderboardPlayers.push(player);
 			for(let t in player.tailBlocks) {
 				let tail = player.tailBlocks[t];
 				tailPack.push({
@@ -194,9 +212,21 @@ function update() {
 		});
 	}
 
+	let leaderboard = [];
+
+	leaderboardPlayers.sort(dynamicSort("score"));
+	while(leaderboardPlayers.length > 10) {
+		leaderboardPlayers.pop();
+	}
+
+	for (let i = 0; i < leaderboardPlayers.length; i++) {
+		leaderboard.push({place:i, name:leaderboardPlayers[i].name, id:leaderboardPlayers[i].id});
+	}
+
 	for(let s in SOCKET_LIST) {
 		SOCKET_LIST[s].emit("gamestate" ,{
 			score:PLAYER_LIST[s].score,
+			leaderboard:leaderboard,
 			players:playerPack,
 			playerTails:tailPack,
 			food:foodPack

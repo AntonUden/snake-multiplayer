@@ -5,7 +5,7 @@
 		<link rel="stylesheet" type="text/css" href="/client/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="/client/css/game.css">
 		<script src="/client/js/jquery-3.3.1.min.js"></script>
-		<script src="/client/js/bootstrap.min.js"></script>
+		<script src="/client/js/bootstrap.bundle.min.js"></script>
 		<script src="/client/js/socket.io.js"></script>
 		<script src="/client/js/cookies.js"></script>
 		<script src="/client/js/phaser.min.js"></script>
@@ -13,6 +13,7 @@
 	<body style="background-color: "#555555">
 		<div id="snake-game"></div>
 		<script src="/client/js/game.js"></script>
+
 		<div id="menu" class="border border-dark rounded">
 			<form class="mx-2 my-2">
 				<div class="form-group">
@@ -22,6 +23,16 @@
 					<input class="form-control btn btn-success" type="button" id="btn_play" value="Play"/>
 				</div>
 			</form>
+		</div>
+
+		<div id="position" class="mx-1 my-1"></div>
+
+		<div id="leaderboard">
+			<div id="leaderboard-text" class="mx-4">
+				Leaderboard
+			</div>
+			
+			<div id="leaderboard-content" class="mx-2"></div>
 		</div>
 	</body>
 </html>

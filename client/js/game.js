@@ -65,12 +65,14 @@ socket.on("id", function(data) {
 
 socket.on("death", function() {
 	setTimeout(function() {
-		$("#menu").show();
+		$("#menu").fadeIn(1000);
+		$("#position").fadeOut(1000);
 	}, 1000);
 });
 
 socket.on("spawn", function(data) {
-	$("#menu").hide();
+	$("#menu").fadeOut(500);
+	$("#position").fadeIn(500);
 	try {
 		game.camera.follow(null, Phaser.Camera.FOLLOW_LOCKON, 1, 1);
 		game.camera.x = data.x * PIXEL_SIZE;
@@ -92,6 +94,13 @@ socket.on("gamestate", function(data) {
 	food.removeAll();
 	names.removeAll();
 	
+	let leaderboardcontent = "";
+	while(data.leaderboard.length > 0) {
+		let entry = data.leaderboard.pop();
+		leaderboardcontent += '<div class="lb-entry ' + ((entry.id == PLAYER_ID) ? "lb-entry-self" : "") + '">' + (entry.place + 1) + ': ' + encodeHTML(entry.name) + '</div>';
+	}
+	$("#leaderboard-content").html(leaderboardcontent);
+
 	for(let i = 0; i < data.food.length; i++) {
 		let foodData = data.food[i];
 		let g = game.add.graphics(foodData.x * PIXEL_SIZE, foodData.y * PIXEL_SIZE); 
@@ -117,6 +126,7 @@ socket.on("gamestate", function(data) {
 		if(player.id == PLAYER_ID) {
 			cameraFollow.x = (player.x * PIXEL_SIZE);
 			cameraFollow.y = (player.y * PIXEL_SIZE);
+			$("#position").html("X: " + player.x + " Y: " + player.y);
 			//game.camera.x = (player.x * PIXEL_SIZE) - (game.width / 2);
 			//game.camera.y = (player.y * PIXEL_SIZE) - (game.height / 2);
 		}
@@ -132,6 +142,10 @@ socket.on("gamestate", function(data) {
 		//players.add(new Phaser.Rectangle((data.playerTails[i].x - (PIXEL_SIZE / 2)) * PIXEL_SIZE, (data.playerTails[i].y - (PIXEL_SIZE / 2)) * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE));
 	}
 });
+
+function encodeHTML(s) {
+	return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+}
 
 function componentToHex(c) {
     var hex = c.toString(16);
@@ -160,6 +174,20 @@ $(document).ready(function() {
 	    e.preventDefault();
 		play();
 	});
+
+	$("#name").change(function() {
+		setCookie("MultiplayerSnake-name", $("#name").val(), 365);
+	});
+
+	try {
+		let name = getCookie("MultiplayerSnake-name");
+		if(name.length > 0 && name.length <= 16) {
+			console.log("Loaded name from cookie: " + name);
+			$("#name").val(name);
+		}
+	} catch(err) {
+		console.log(err);
+	}
 });
 
 $(document).keydown(function(e) { 

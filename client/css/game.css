@@ -8,6 +8,9 @@
 	width: 30%;
 	left: 50%;
 	top: 50%;
+	max-width: 400px;
+	min-width: 200px;
+	z-index: 4;
 	transform: translate(-50%, -50%);
     background-color: #FFFFFF;
 }
@@ -18,4 +21,37 @@
 	height: 100%;
 	left: 0;
 	top: 0;
+}
+
+#leaderboard {
+	background-color: #00000088;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	z-index: 2;
+}
+
+#leaderboard-content {
+	text-align: center;
+	color: #FFFFFF;
+	font-size: 30px;
+}
+
+#leaderboard-text {
+	color: #FFFFFF;
+	font-size: 25px;
+	text-align: center;
+}
+
+#position {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	z-index: 3;
+	background-color: #FFFFFF55;
+	color: #000000;
+}
+
+.lb-entry-self {
+	color: #FFAFAF;
 }
