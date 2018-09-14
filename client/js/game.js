@@ -67,6 +67,7 @@ socket.on("death", function() {
 	setTimeout(function() {
 		$("#menu").fadeIn(1000);
 		$("#position").fadeOut(1000);
+		$("#btn_play").focus();
 	}, 1000);
 });
 
@@ -178,6 +179,8 @@ $(document).ready(function() {
 	$("#name").change(function() {
 		setCookie("MultiplayerSnake-name", $("#name").val(), 365);
 	});
+
+	$("#name").focus();
 
 	try {
 		let name = getCookie("MultiplayerSnake-name");
