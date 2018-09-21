@@ -27,6 +27,13 @@ setInterval(function() {
 
 socket.on('pong2', function() {
 	let latency = Date.now() - startTime;
+	if(latency < 100) {
+		$("#ping-badge").removeClass("badge-danger");
+		$("#ping-badge").addClass("badge-success");
+	} else {
+		$("#ping-badge").removeClass("badge-success");
+		$("#ping-badge").addClass("badge-danger");
+	}
 	$("#server-ping").html(latency);
 });
 

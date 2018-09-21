@@ -18,8 +18,10 @@
 			<form class="mx-2 my-2">
 				<h1 class="text-center">Multiplayer Snake</h1>
 				<div id="final-score" class="text-center">
-					Your final score:
-					<span id="total-score"></span>
+					<span class="badge badge-info">
+						Your final score:
+						<span id="total-score"></span>
+					</span>
 				</div>
 				<br>
 				<div class="form-group">
@@ -32,20 +34,26 @@
 			</form>
 		</div>
 
-		<div id="server-info" class="border">
+		<div id="server-info" class="border border-dark">
 			<div id="player-info">
 				<div id="score" class="mx-1 my-1">
-					Score: 
-					<span id="player-score">?</span>
+					<span class="badge badge-light">
+						Score: 
+						<span id="player-score">?</span>
+					</span>
 				</div>
-				<div id="position" class="mx-1 my-1"></div>
+				<span class="badge badge-light" id="position" class="mx-1 my-1"></span>
+				<br>
 			</div>
-			<div id="ping" class="mx-1 my-1">Server ping: 
-				<span id="server-ping"></span>
+			<div id="ping" class="mx-1 my-1">
+				<span id="ping-badge" class="badge badge-success">
+					Server ping: 
+					<span id="server-ping"></span>
+				</span>
 			</div>
 		</div>
 
-		<div id="leaderboard">
+		<div id="leaderboard" class="border border-dark">
 			<div id="leaderboard-text" class="mx-4">
 				Leaderboard
 			</div>
