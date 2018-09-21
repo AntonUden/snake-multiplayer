@@ -23,6 +23,10 @@
 	top: 0;
 }
 
+#player-info {
+	display: none;
+}
+
 #leaderboard {
 	background-color: #00000088;
 	position: absolute;

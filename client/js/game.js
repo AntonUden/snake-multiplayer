@@ -77,18 +77,18 @@ socket.on("id", function(data) {
 });
 
 socket.on("death", function(data) {
-	$("#final-score").show();
 	$("#total-score").html(data.score);
+	$("#final-score").show();
 	setTimeout(function() {
 		$("#menu").fadeIn(1000);
-		$("#position").fadeOut(1000);
+		$("#player-info").fadeOut(1000);
 		$("#btn_play").focus();
 	}, 1000);
 });
 
 socket.on("spawn", function(data) {
 	$("#menu").fadeOut(500);
-	$("#position").fadeIn(500);
+	$("#player-info").fadeIn(500);
 	try {
 		game.camera.follow(null, Phaser.Camera.FOLLOW_LOCKON, 1, 1);
 		game.camera.x = data.x * PIXEL_SIZE;
@@ -143,6 +143,7 @@ socket.on("gamestate", function(data) {
 		if(player.id == PLAYER_ID) {
 			cameraFollow.x = (player.x * PIXEL_SIZE);
 			cameraFollow.y = (player.y * PIXEL_SIZE);
+			$("#player-score").html(player.score);
 			$("#position").html("X: " + player.x + " Y: " + player.y);
 		}
 
@@ -158,7 +159,6 @@ socket.on("gamestate", function(data) {
 });
 
 /* Functions */
-
 function encodeHTML(s) {
 	return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 }

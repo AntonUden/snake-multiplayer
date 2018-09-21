@@ -189,6 +189,7 @@ function update() {
 				x:player.x,
 				y:player.y,
 				name:player.name,
+				score:player.score,
 				color:player.color
 			});
 			leaderboardPlayers.push(player);
