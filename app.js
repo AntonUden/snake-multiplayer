@@ -100,7 +100,7 @@ var Player = function(id) {
 				let pTail = player.tailBlocks[t];
 				if(self.x == pTail.x && self.y == pTail.y) {
 					self.die();
-					player.score+=(self.score / 2);
+					player.score+=(5+(self.score / 2));
 					return;
 				}
 			}
