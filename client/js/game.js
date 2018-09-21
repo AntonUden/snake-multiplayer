@@ -1,12 +1,12 @@
-const MAP_WIDTH = 500;
-const MAP_HEIGHT = 500;
+let MAP_WIDTH = 500;
+let MAP_HEIGHT = 500;
 
 const PIXEL_SIZE = 10;
 const CAMERA_SPEED = 0.15;
 
 var PLAYER_ID = -1;
 
-var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'snake-game', {preload: preload, create:create});
+var game;
 var socket = io();
 
 var cameraFollow;
@@ -181,8 +181,22 @@ function play() {
 	socket.emit("spawn", {name:$("#name").val()});
 }
 
-/* JQuery */
+/* Load */
 $(document).ready(function() {
+	try {
+		let conf = JSON.parse($.ajax({
+			async: false,
+			cache: false,
+			type: "GET",
+			url: "/config"
+		}).responseText);
+
+		MAP_WIDTH = conf.MAP_WIDTH;
+		MAP_HEIGHT = conf.MAP_HEIGHT;
+		$("#name").attr('maxlength', conf.MAX_NAME_LENGTH);
+	} catch(err) {
+		console.log(err);
+	}
 	$("#final-score").hide();
 	$("#btn_play").click(function() {
 		play();
@@ -198,6 +212,8 @@ $(document).ready(function() {
 	});
 
 	$("#name").focus();
+
+	game = new Phaser.Game(800, 600, Phaser.CANVAS, 'snake-game', {preload: preload, create:create});
 
 	try {
 		let name = getCookie("MultiplayerSnake-name");

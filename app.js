@@ -4,15 +4,6 @@ var serv = require('http').Server(app);
 var colors = require('colors/safe');
 var middleware = require('socketio-wildcard')();
 
-
-var debug = typeof v8debug === 'object' || /--debug/.test(process.execArgv.join(' '));
-
-console.log(colors.green("[Snake] Starting server..."));
-app.get('/',function(req, res) {
-	res.sendFile(__dirname + '/client/index.html');
-});
-app.use('/client',express.static(__dirname + '/client'));
-
 //---------- Server settings ----------
 const MAX_NAME_LENGTH = 16;
 const fps = 5;
@@ -22,6 +13,21 @@ const MAP_HEIGHT = 500;
 
 const MAX_FOOD = 1500;
 //-------------------------------------
+
+var debug = typeof v8debug === 'object' || /--debug/.test(process.execArgv.join(' '));
+
+console.log(colors.green("[Snake] Starting server..."));
+app.get('/',function(req, res) {
+	res.sendFile(__dirname + '/client/index.html');
+});
+app.get('/config', function(req, res){
+	res.send(JSON.stringify({
+		MAX_NAME_LENGTH:MAX_NAME_LENGTH,
+		MAP_WIDTH:MAP_WIDTH,
+		MAP_HEIGHT:MAP_HEIGHT
+	}));
+});
+app.use('/client',express.static(__dirname + '/client'));
 
 var port = process.env.PORT || 80;
 if(process.env.PORT == undefined) {
@@ -82,8 +88,6 @@ var Player = function(id) {
 				self.x--;
 				break;
 			default:
-			// Invalid direction
-				console.log("Invalid direction for player " + self.id + ". Direction reset to 0");
 				self.direction = 0;
 				break;
 		}

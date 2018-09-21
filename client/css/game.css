@@ -28,7 +28,7 @@
 }
 
 #leaderboard {
-	background-color: #00000088;
+	background-color: rgba(0, 0, 0, 0.35);
 	position: absolute;
 	top: 0px;
 	right: 0px;
@@ -52,7 +52,6 @@
 	bottom: 0px;
 	left: 0px;
 	z-index: 3;
-	background-color: #FFFFFF55;
 	color: #000000;
 }
 
