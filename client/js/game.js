@@ -17,6 +17,21 @@ var food;
 var map;
 var names;
 
+/* Server ping */
+var startTime;
+
+setInterval(function() {
+  startTime = Date.now();
+  socket.emit('ping2');
+}, 2000);
+
+socket.on('pong2', function() {
+	let latency = Date.now() - startTime;
+	$("#server-ping").html(latency);
+});
+
+
+/* Init game engine*/
 function preload() {
 	game.load.image('background', '/client/img/game/background.png');
 }
@@ -55,12 +70,15 @@ function create() {
 	map.add(g);
 }
 
+/* Socket events */
 socket.on("id", function(data) {
 	PLAYER_ID = data.id;
 	console.log("Your id is " + PLAYER_ID);
 });
 
-socket.on("death", function() {
+socket.on("death", function(data) {
+	$("#final-score").show();
+	$("#total-score").html(data.score);
 	setTimeout(function() {
 		$("#menu").fadeIn(1000);
 		$("#position").fadeOut(1000);
@@ -83,7 +101,7 @@ socket.on("spawn", function(data) {
 
 socket.on("gamestate", function(data) {
 	if(players == undefined || tails == undefined || food == undefined || names == undefined) {
-		console.log("Waiting for groups to load");
+		console.log("Waiting for engine to start...");
 		return;
 	}
 
@@ -139,6 +157,8 @@ socket.on("gamestate", function(data) {
 	}
 });
 
+/* Functions */
+
 function encodeHTML(s) {
 	return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 }
@@ -161,7 +181,9 @@ function play() {
 	socket.emit("spawn", {name:$("#name").val()});
 }
 
+/* JQuery */
 $(document).ready(function() {
+	$("#final-score").hide();
 	$("#btn_play").click(function() {
 		play();
 	});
@@ -188,6 +210,7 @@ $(document).ready(function() {
 	}
 });
 
+/* Key listener */
 $(document).keydown(function(e) { 
 	var key = 0;
 	if (e == null) {

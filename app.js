@@ -120,7 +120,9 @@ var Player = function(id) {
 		self.deleteTail();
 		
 		try {
-			SOCKET_LIST[self.id].emit("death");
+			SOCKET_LIST[self.id].emit("death", {
+				score:self.score
+			});
 		} catch(err) {
 			if(debug) {
 				console.log(err);
@@ -296,6 +298,10 @@ io.sockets.on("connection", function(socket) {
 				throw err;
 			}
 		}
+	});
+
+	socket.on('ping2', function() {
+		socket.emit('pong2');
 	});
 
 	socket.on("spawn", function(data) {

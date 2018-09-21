@@ -16,17 +16,28 @@
 
 		<div id="menu" class="border border-dark rounded">
 			<form class="mx-2 my-2">
-				<h1 class="text-center mb-4">Multiplayer Snake</h1>
+				<h1 class="text-center">Multiplayer Snake</h1>
+				<div id="final-score" class="text-center">
+					Your final score:
+					<span id="total-score"></span>
+				</div>
+				<br>
 				<div class="form-group">
 					<input class="form-control" type="text" id="name" maxlength="16" placeholder="Name" value="Unnamed player"/>
 				</div>
-				<div>
+				<div class="mb-2">
 					<input class="form-control btn btn-success active" type="button" id="btn_play" value="Play"/>
 				</div>
+				<a href="https://github.com/Zeeraa/snake-multiplayer/issues" target="_blank">Report a bug</a>
 			</form>
 		</div>
 
-		<div id="position" class="mx-1 my-1"></div>
+		<div id="server-info">
+			<div id="position" class="mx-1 my-1"></div>
+			<div id="ping" class="mx-1 my-1">Server ping: 
+				<span id="server-ping">?</span>
+			</div>
+		</div>
 
 		<div id="leaderboard">
 			<div id="leaderboard-text" class="mx-4">
