@@ -151,6 +151,16 @@ var Player = function(id) {
 	return self;
 }
 
+var Tail = function(x, y, playerId, color) {
+	var self = {
+		x:x,
+		y:y,
+		playerId:playerId,
+		color:color
+	}
+	return self;
+}
+
 function dynamicSort(property) {
 	var sortOrder = 1;
 	if(property[0] === "-") {
@@ -163,17 +173,7 @@ function dynamicSort(property) {
 	}
 }
 
-var Tail = function(x, y, playerId, color) {
-	var self = {
-		x:x,
-		y:y,
-		playerId:playerId,
-		color:color
-	}
-	return self;
-}
-
-function update() {
+async function update() {
 	let playerPack = [];
 	let tailPack = [];
 	let foodPack = [];
